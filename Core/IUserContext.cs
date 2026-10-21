@@ -35,4 +35,8 @@ public sealed class UserIdentity
             return userId;
         }
     }
+
+    public string? Role => _user?.FindFirst(ClaimTypes.Role)?.Value ?? _user?.FindFirst("role")?.Value ?? "User";
+
+    public string? Email => _user?.FindFirst(ClaimTypes.Email)?.Value ?? _user?.FindFirst("email")?.Value;
 }

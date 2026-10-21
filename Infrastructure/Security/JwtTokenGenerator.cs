@@ -17,14 +17,15 @@ public class JwtTokenGenerator(IConfiguration configuration) : IJwtTokenGenerato
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(JwtRegisteredClaimNames.GivenName, user.Firstname),
-            new Claim(JwtRegisteredClaimNames.FamilyName, user.Lastname)
+            new Claim(JwtRegisteredClaimNames.FamilyName, user.Lastname),
+            new Claim(ClaimTypes.Role, user.Role)
         };
 
         var token = new JwtSecurityToken(
             issuer: configuration["Jwt:Issuer"],
             audience: configuration["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(8),
+            expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

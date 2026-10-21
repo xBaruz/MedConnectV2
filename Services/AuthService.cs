@@ -95,6 +95,9 @@ public class AuthService(
             return Result<AuthResponseDto>.Fail(new Error.Unauthorized("Nieprawidłowy email lub hasło."));
         }
 
+        user.LastLoginAt = DateTime.UtcNow;
+        writeRepository.Update(user);
+
         var jwtToken = tokenGenerator.GenerateToken(user);
         var refreshToken = RefreshToken.Create(user.Id);
 

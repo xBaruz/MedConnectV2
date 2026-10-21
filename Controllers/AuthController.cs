@@ -39,4 +39,20 @@ public class AuthController(IAuthService authService) : ControllerBase
             }
         );
     }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command)
+    {
+        var result = await authService.RefreshTokenAsync(command);
+
+        return result.Match<IActionResult>(
+            success => Ok(success),
+            failure => failure switch
+            {
+                Error.Validation val => BadRequest(new { message = val.Message }),
+                Error.Unauthorized unauth => Unauthorized(new { message = unauth.Message }),
+                _ => StatusCode(500, new { message = "Wystąpił nieoczekiwany błąd." })
+            }
+        );
+    }
 }
