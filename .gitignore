@@ -1,0 +1,26 @@
+## Zmienne środowiskowe i sekrety (BARDZO WAŻNE)
+.env
+.env.*
+!.env.example
+*.user
+*.userosscache
+*.suo
+
+## Katalogi kompilacji .NET
+bin/
+obj/
+out/
+
+## VS Code / Rider / Visual Studio
+.vscode/
+.idea/
+*.sln.docstates
+
+## Logi i pakiety
+logs/
+*.log
+*.nupkg
+
+## Bazy danych / lokalne pliki testowe
+*.mdf
+*.ldf
