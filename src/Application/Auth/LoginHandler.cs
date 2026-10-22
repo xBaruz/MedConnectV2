@@ -11,7 +11,8 @@ namespace MedConnect.Application.Auth;
 public sealed class LoginHandler(
     IUserReadRepository readRepository,
     IUserWriteRepository writeRepository,
-    IJwtTokenGenerator tokenGenerator)
+    IJwtTokenGenerator tokenGenerator,
+    IRefreshTokenGenerator refreshTokenGenerator)
     : ICommandHandler<LoginCommand, AuthResponseDto>
 {
     public async Task<Result<AuthResponseDto>> HandleAsync(LoginCommand command, CancellationToken ct = default)
@@ -29,16 +30,17 @@ public sealed class LoginHandler(
         await writeRepository.SetLastLoginAtAsync(user.Id,DateTime.UtcNow,ct);
 
         var jwtToken = tokenGenerator.GenerateToken(user);
-        var refreshToken = RefreshToken.Create(user.Id);
+        var rawRefreshToken = refreshTokenGenerator.Generate();
+        var refreshTokenHash = refreshTokenGenerator.ComputeHash(rawRefreshToken);
+        var refreshToken = RefreshToken.Create(user.Id, refreshTokenHash);
 
         await writeRepository.AddRefreshTokenAsync(refreshToken, ct);
-
         await writeRepository.SaveChangesAsync(ct);
 
         var response = new AuthResponseDto(
             user.Id,
             jwtToken,
-            refreshToken.Token);
+            rawRefreshToken);
 
         return Result<AuthResponseDto>.Ok(response);
     }

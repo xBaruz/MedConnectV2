@@ -3,6 +3,9 @@ using MedConnect.Core.Abstractions;
 using MedConnect.Core.Commands;
 using MedConnect.Core.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using MedConnect.Extensions;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MedConnect.Controllers;
 
@@ -11,9 +14,11 @@ namespace MedConnect.Controllers;
 public class AuthController(
     ICommandHandler<RegisterUserCommand, AuthResponseDto> registerHandler,
     ICommandHandler<LoginCommand, AuthResponseDto> loginHandler,
-    ICommandHandler<RefreshTokenCommand, AuthResponseDto> refreshHandler)
+    ICommandHandler<RefreshTokenCommand, AuthResponseDto> refreshHandler,
+    ICommandHandler<LogoutCommand, bool> logoutHandler)
     : ControllerBase
 {
+    [EnableRateLimiting(AuthRateLimitPolicies.Register)]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserCommand command, CancellationToken ct)
     {
@@ -30,6 +35,8 @@ public class AuthController(
         );
     }
 
+
+    [EnableRateLimiting(AuthRateLimitPolicies.Login)]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken ct)
     {
@@ -46,6 +53,7 @@ public class AuthController(
         );
     }
 
+    [EnableRateLimiting(AuthRateLimitPolicies.RefreshToken)]
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenCommand command, CancellationToken ct)
     {
@@ -60,5 +68,24 @@ public class AuthController(
                 _ => StatusCode(500, new { message = "Wystąpił nieoczekiwany błąd." })
             }
         );
+    }
+
+    [AllowAnonymous]
+    [HttpPost("logout")]
+    [EnableRateLimiting(AuthRateLimitPolicies.RefreshToken)]
+    public async Task<IActionResult> Logout([FromBody] LogoutCommand command, CancellationToken ct)
+    {
+        var result = await logoutHandler.HandleAsync(command, ct);
+
+        return result.Match<IActionResult>(
+            success => NoContent(),
+            failure => failure switch
+            {
+                Error.Validation error => BadRequest(new{ code = error.Code, message = error.Message}),
+                Error.Conflict error => Conflict(new { code = error.Code, message = error.Message }),
+                _ => Problem(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: "Wystąpił nieoczekiwany błąd.")
+            });
     }
 }

@@ -15,6 +15,7 @@ public static class ProgramExtensions
         services.AddInfrastructure(configuration);
         services.AddJwtAuthentication(configuration);
         services.AddApiDocumentation();
+        services.AddAuthRateLimiting();
 
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
@@ -40,6 +41,8 @@ public static class ProgramExtensions
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseRateLimiter();
 
         app.MapControllers();
         app.MapApiDocumentation();

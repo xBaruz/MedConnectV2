@@ -10,9 +10,7 @@ namespace MedConnect.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/v1/[controller]")]
-public sealed class UserController(
-    IQueryHandler<GetCurrentUserQuery, UserResponseDto> handler
-    ): ControllerBase
+public sealed class UserController(IQueryHandler<GetCurrentUserQuery, UserResponseDto> handler): ControllerBase
 {
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser(CancellationToken ct)

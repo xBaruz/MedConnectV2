@@ -11,4 +11,5 @@ public interface IUserWriteRepository
     Task RemoveExpiredRefreshTokensAsync(CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
     Task SetLastLoginAtAsync(Guid userId, DateTime time, CancellationToken ct = default);
+    Task<bool> TrySaveRefreshTokenChangesAsync(CancellationToken ct = default);
 }

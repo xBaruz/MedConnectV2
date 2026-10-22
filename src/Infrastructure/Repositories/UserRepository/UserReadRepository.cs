@@ -29,9 +29,8 @@ public class UserReadRepository(AppDbContext dbContext) : IUserReadRepository
             .AnyAsync(u => u.Email == normalizedEmail, ct);
     }
 
-    public async Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken ct = default)
+    public async Task<RefreshToken?> GetRefreshTokenByHashAsync(string tokenHash, CancellationToken ct = default)
     {
-        return await dbContext.Set<RefreshToken>()
-            .FirstOrDefaultAsync(rt => rt.Token == token, ct);
+        return await dbContext.RefreshTokens.SingleOrDefaultAsync(token => token.TokenHash == tokenHash, ct);
     }
 }

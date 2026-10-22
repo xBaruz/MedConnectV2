@@ -53,4 +53,20 @@ public class UserWriteRepository(AppDbContext dbContext) : IUserWriteRepository
 
         user.LastLoginAt = time;
     }
+
+    public async Task<bool> TrySaveRefreshTokenChangesAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            await dbContext.SaveChangesAsync(ct);
+
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            dbContext.ChangeTracker.Clear();
+
+            return false;
+        }
+    }
 }

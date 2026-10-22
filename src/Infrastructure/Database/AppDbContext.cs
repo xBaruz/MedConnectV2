@@ -32,15 +32,25 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<RefreshToken>(builder =>
         {
-            builder.HasKey(rt => rt.Id);
-            builder.HasIndex(rt => rt.Token).IsUnique();
-            builder.Property(rt => rt.Token).IsRequired().HasMaxLength(200);
-            builder.Property(rt => rt.UserId).IsRequired();
-            
+            builder.HasKey(token => token.Id);
+
+            builder.HasIndex(token => token.TokenHash)
+                .IsUnique();
+
+            builder.Property(token => token.TokenHash)
+                .HasMaxLength(64)
+                .IsRequired();
+
+            builder.Property(token => token.UserId)
+                .IsRequired();
+
+            builder.Property(token => token.RowVersion)
+                .IsRowVersion();
+
             builder.HasOne<User>()
-                   .WithMany()
-                   .HasForeignKey(rt => rt.UserId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                .WithMany()
+                .HasForeignKey(token => token.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Appointment>(builder =>

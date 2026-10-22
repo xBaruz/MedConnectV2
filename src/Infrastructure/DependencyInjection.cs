@@ -3,6 +3,7 @@ using MedConnect.Infrastructure.Security;
 using MedConnect.Repositories;
 using MedConnect.Services;
 using Microsoft.EntityFrameworkCore;
+using MedConnect.Core.Abstractions;
 
 namespace MedConnect.Infrastructure;
 
@@ -24,6 +25,8 @@ public static class DependencyInjection
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         services.AddHostedService<RefreshTokenCleanupService>();
+        
+        services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
 
         return services;
     }
